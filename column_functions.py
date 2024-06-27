@@ -120,7 +120,30 @@ def rename(dataframe: pd.DataFrame, rules: RenameRules) -> pd.DataFrame:
         df.columns[column_name] = rules.new_names[index]
     
     return df
+
+
+"""
+    Clip Rules:
+    - Clips values from a column that go above an upper value and/or below a lower value
+    - If not passed, None will be considered for each limit
+    - The same rules will apply for every column passed on each call.
     
+"""
+class ClipRules():
+    column_names: list[str]
+    lower_value: float | None
+    upper_value: float | None
+    def __init__(self, column_names: list[str], lower_value: float | None, upper_value: float | None):
+        self.column_names = column_names
+        self.lower_value = lower_value
+        self.upper_value = upper_value
+        
+def clip(dataframe: pd.DataFrame, rules: ClipRules) -> pd.DataFrame:
+    df = dataframe.copy()
+    for column_name in rules.column_names:
+        df[column_name] = df[column_name].clip(lower=rules.lower_value, upper=rules.upper_value)
+    
+    return df
 
 # TODO: add remove conditional (maybe this will fit on cell functions as maybe it will use replace/remove functions) (not used on mvp)
 # TODO: maybe add a function to change type of columns (not used on mvp)
