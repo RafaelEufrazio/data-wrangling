@@ -122,4 +122,5 @@ def rename(dataframe: pd.DataFrame, rules: RenameRules) -> pd.DataFrame:
     return df
     
 
-# TODO: add remove conditional (maybe this will fit on cell functions as maybe it will use replace/remove functions)
+# TODO: add remove conditional (maybe this will fit on cell functions as maybe it will use replace/remove functions) (not used on mvp)
+# TODO: maybe add a function to change type of columns (not used on mvp)
