@@ -98,4 +98,25 @@ def standardize(dataframe: pd.DataFrame, rules: StandardizeRules) -> pd.DataFram
     df.loc[:, rules.column_name] = df[rules.column_name].dt.floor('Min')
     return df
 
+
+"""
+    Rename rules:
+    - Renames specific columns in dataframe
+    - New names must be passed in the same order as the ones that will be changed
+"""
+class RenameRules():
+    column_names: list[str]
+    new_names: list[str]
+    def __init__(self, column_names: list[str], new_names: list[str]):
+        self.column_names = column_names
+        self.new_names = new_names
+        
+def rename(dataframe: pd.DataFrame, rules: RenameRules) -> pd.DataFrame:
+    df = dataframe.copy()
+    for index, column_name in rules.column_names:
+        df.columns[column_name] = rules.new_names[index]
+    
+    return df
+    
+
 # TODO: add remove conditional (maybe this will fit on cell functions as maybe it will use replace/remove functions)
