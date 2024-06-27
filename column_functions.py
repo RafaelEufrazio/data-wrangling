@@ -3,16 +3,19 @@ import pandas as pd
 """
     Sort rules:
     - Defining the column from which the dataframe will be sorted
+    - Can be sorted ascending or descending (default is ascending)
 """
 
 class SortRules():
     column_name: str
-    def __init__(self, column_name: str):
+    ascending: bool
+    def __init__(self, column_name: str, ascending: bool = True):
         self.column_name = column_name
+        self.ascending = ascending
 
 def sort(dataframe: pd.DataFrame, rules: SortRules) -> pd.DataFrame:
     df = dataframe.copy()
-    return df.sort_values(rules.column_name)
+    return df.sort_values(rules.column_name, ascending=rules.ascending)
 
 """
     Reindex rules:
