@@ -5,7 +5,6 @@ import pandas as pd
     - Defining the column from which the dataframe will be sorted
     - Can be sorted ascending or descending (default is ascending)
 """
-
 class SortRules():
     column_name: str
     ascending: bool
@@ -17,11 +16,11 @@ def sort(dataframe: pd.DataFrame, rules: SortRules) -> pd.DataFrame:
     df = dataframe.copy()
     return df.sort_values(rules.column_name, ascending=rules.ascending)
 
+
 """
     Reindex rules:
     - Defining the column which will be the new index
 """
-
 class ReindexRules():
     column_name: str
     def __init__(self, column_name: str):
@@ -36,7 +35,6 @@ def reindex(dataframe: pd.DataFrame, rules: ReindexRules) -> pd.DataFrame:
     Remove Duplicates rules:
     - Defining the columns which will be considered to remove duplicates
 """
-
 class RemoveDuplicatesRules():
     column_names: list[str]
     def __init__(self, column_names: list[str]):
@@ -46,13 +44,13 @@ def remove_duplicates(dataframe: pd.DataFrame, rules: RemoveDuplicatesRules) -> 
     df = dataframe.copy()
     return df.drop_duplicates(subset=rules.column_names)
 
+
 """
     Remove Missing rules:
     - Defining if the data will be removed if one column has a NAN value or only if all of them have NAN values
     
     how: "any" | "all"
 """
-
 class RemoveMissingRules():
     how: str
     def __init__(self, how: str = 'any'):
@@ -60,6 +58,7 @@ class RemoveMissingRules():
         
 def remove_missing(dataframe: pd.DataFrame, rules: RemoveMissingRules) -> pd.DataFrame:
     return dataframe.dropna(how=rules.how)
+
 
 """
     Parse Datetime rules:
@@ -69,7 +68,6 @@ def remove_missing(dataframe: pd.DataFrame, rules: RemoveMissingRules) -> pd.Dat
     At the moment only one rule of parsing is passed at a time, even with many columns
     The default parsing should probably be "%d/%m/%Y %H:%M:%S" (it is not being defined right now)
 """
-
 class ParseDatetimeRules():
     formatting: str
     column_names: list[str]
@@ -84,13 +82,13 @@ def parse_datetime(dataframe: pd.DataFrame, rules: ParseDatetimeRules) -> pd.Dat
     
     return df
 
+
 """
     Standardize rules:
     - Defining the columns which will be standardized
     
     At the moment only one rule of standardization is used, which is flooring the data
 """
-
 class StandardizeRules():
     column_name: str
     def __init__(self, column_name: str):
