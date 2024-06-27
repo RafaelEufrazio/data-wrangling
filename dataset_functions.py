@@ -17,7 +17,7 @@ class SplitRules():
 """
     Separates existing dataframe into many dataframes in a map
     - The key for each rule is the set of columns that will define the new dataframe
-    - The rules define the title of the columns within the new dataframe and the name of the dataframe itself 
+    - The rules define the title of the columns within the new dataframes and the name of the dataframes themselves
     - Both information are necessary to be passed as arguments
     - The column names must be passed in the same order as the columns in the key
     
@@ -47,3 +47,28 @@ def split_df(dataframe: pd.DataFrame, rules: dict[list[int], SplitRules]) -> dic
         df_map[rule.df_name] = new_df
     
     return df_map
+
+class JoinRules():
+    column_names: list[str] = []
+    
+    def __init__(self, column_names: list[str]):
+        self.column_names = column_names
+
+"""
+    Joins dataframes in a map into a single one, horizontally
+    - The key for each rule is the name of each dataframe
+    - The columns extracted from the dataframes will be added in the same sequence as they are passed
+    - At the moment there is no way to specify the final sequence of columns specifically apart from each dataframe
+    
+    This may be used to join as many columns from as many dataframes as wanted
+    It does not matter if dataframes are duplicated, or columns are passed more than once.
+"""
+def join_dfs(df_map: dict[str, pd.DataFrame], rules: dict[str, JoinRules]) -> pd.DataFrame:
+    new_df: pd.DataFrame
+    for df_name, rule in rules.items():
+        if new_df is None:
+            new_df = df_map[df_name][rule.column_names]
+        else:
+            new_df = pd.concat([new_df, df_map[df_name][rule.column_names]], axis = 1)
+            
+    return new_df
