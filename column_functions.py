@@ -1,0 +1,101 @@
+import pandas as pd
+
+"""
+    Sort rules:
+    - Defining the column from which the dataframe will be sorted
+"""
+
+class SortRules():
+    column_name: str
+    def __init__(self, column_name: str):
+        self.column_name = column_name
+
+def sort(dataframe: pd.DataFrame, rules: SortRules) -> pd.DataFrame:
+    df = dataframe.copy()
+    return df.sort_values(rules.column_name)
+
+"""
+    Reindex rules:
+    - Defining the column which will be the new index
+"""
+
+class ReindexRules():
+    column_name: str
+    def __init__(self, column_name: str):
+        self.column_name = column_name
+        
+def reindex(dataframe: pd.DataFrame, rules: ReindexRules) -> pd.DataFrame:
+    df = dataframe.copy()
+    return df.set_index(rules.column_name)
+
+
+"""
+    Remove Duplicates rules:
+    - Defining the columns which will be considered to remove duplicates
+"""
+
+class RemoveDuplicatesRules():
+    column_names: list[str]
+    def __init__(self, column_names: list[str]):
+        self.column_names = column_names
+
+def remove_duplicates(dataframe: pd.DataFrame, rules: RemoveDuplicatesRules) -> pd.DataFrame:
+    df = dataframe.copy()
+    return df.drop_duplicates(subset=rules.column_names)
+
+"""
+    Remove Missing rules:
+    - Defining if the data will be removed if one column has a NAN value or only if all of them have NAN values
+    
+    how: "any" | "all"
+"""
+
+class RemoveMissingRules():
+    how: str
+    def __init__(self, how: str = 'any'):
+        self.how = how
+        
+def remove_missing(dataframe: pd.DataFrame, rules: RemoveMissingRules) -> pd.DataFrame:
+    return dataframe.dropna(how=rules.how)
+
+"""
+    Parse Datetime rules:
+    - Defining the columns which will be parsed
+    - Defining the formatting which will be used to parse the columns
+    
+    At the moment only one rule of parsing is passed at a time, even with many columns
+    The default parsing should probably be "%d/%m/%Y %H:%M:%S" (it is not being defined right now)
+"""
+
+class ParseDatetimeRules():
+    formatting: str
+    column_names: list[str]
+    def __init__(self, formatting: str, column_names: str):
+        self.formatting = formatting
+        self.column_names = column_names
+
+def parse_datetime(dataframe: pd.DataFrame, rules: ParseDatetimeRules) -> pd.DataFrame:
+    df = dataframe.copy()
+    for column in rules.column_names:
+        df[column] = pd.to_datetime(df[column], format=rules.formatting)
+    
+    return df
+
+"""
+    Standardize rules:
+    - Defining the columns which will be standardized
+    
+    At the moment only one rule of standardization is used, which is flooring the data
+"""
+
+class StandardizeRules():
+    column_name: str
+    def __init__(self, column_name: str):
+        self.column_name = column_name
+        
+def standardize(dataframe: pd.DataFrame, rules: StandardizeRules) -> pd.DataFrame:
+    df = dataframe.copy()
+    df.loc[:, rules.column_name] = df[rules.column_name].dt.floor('Min')
+    return df
+
+# TODO: add remove conditional (maybe this will fit on cell functions as maybe it will use replace/remove functions)
