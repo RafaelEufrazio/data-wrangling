@@ -375,7 +375,7 @@ class IrradianceProcessor(object):
                 previous_value = dataframe.loc[previous_index][NEW_COLUMN_NAMES.VALUE]
         
         return dataframe
-                
+
     """ Finds and substitutes values where abrupt changes where detected over a threshold on a dataframe """
     def _fix_abrupt_changes(self, sensor, dataframe: pd.DataFrame, equivalent_dataframe: pd.DataFrame, threshold: int) -> pd.DataFrame:
         
