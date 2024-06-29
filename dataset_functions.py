@@ -72,3 +72,5 @@ def join_dfs(df_map: dict[str, pd.DataFrame], rules: dict[str, JoinRules]) -> pd
             new_df = pd.concat([new_df, df_map[df_name][rule.column_names]], axis = 1)
             
     return new_df
+
+# TODO: create a function to iterate through dataframes and execute the dataframe operation on each of them
