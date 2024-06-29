@@ -41,3 +41,7 @@ def abrupt(dataframe: pd.DataFrame, rules: AbruptRules) -> pd.DataFrame:
                     return # Remove this
         previous_index = row_index
         previous_value = dataframe.loc[row_index][rules.column_names[0]]
+        
+        
+
+# TODO: maybe add a function that runs an excel formula across all rows on specific columns
