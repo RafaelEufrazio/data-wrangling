@@ -143,5 +143,24 @@ def clip(dataframe: pd.DataFrame, rules: ClipRules) -> pd.DataFrame:
     
     return df
 
+
+"""
+    Resample Rules:
+    - Resamples timeseries data based on a specific column
+    - Only accepts one column so far (need to add being able to use index column?)
+    - Expects a frequency to resample as a string (could accept an EnumStr type or timedelta object?)
+    
+"""
+class ResampleRules():
+    column_name: str
+    frequency: str
+    
+    def __init__(self, column_name: str, frequency: str):
+        self.column_name = column_name
+        self.frequency = frequency
+
+def resample(dataframe: pd.DataFrame, rules: ResampleRules) -> pd.DataFrame:
+    return dataframe.resample(rule=rules.frequency, on=rules.column_name)
+
 # TODO: add remove conditional (maybe this will fit on cell functions as maybe it will use replace/remove functions) (not used on mvp)
 # TODO: maybe add a function to change type of columns (not used on mvp)
