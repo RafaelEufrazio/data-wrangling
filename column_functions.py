@@ -162,5 +162,6 @@ class ResampleRules():
 def resample(dataframe: pd.DataFrame, rules: ResampleRules) -> pd.DataFrame:
     return dataframe.resample(rule=rules.frequency, on=rules.column_name)
 
+# TODO: add mean function
 # TODO: add remove conditional (maybe this will fit on cell functions as maybe it will use replace/remove functions) (not used on mvp)
 # TODO: maybe add a function to change type of columns (not used on mvp)
