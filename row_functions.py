@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import Callable
+from typing import Callable, Optional
 
 """
     This class is used to carry referential dataframe information to be used on another one
@@ -14,7 +14,8 @@ from typing import Callable
 """
 class Reference():
     column_names: list[str]
-    df_name: str | None
+    
+    df_name: Optional[str]
     both: bool
     callback: Callable
     
