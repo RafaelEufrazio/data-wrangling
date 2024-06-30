@@ -25,7 +25,7 @@ class SplitRules():
     It does not matter if columns are repeated or not, or if all columns are being used.
 """
 def split_df(dataframe: pd.DataFrame, rules: dict[list[int], SplitRules]) -> dict[str, pd.DataFrame]:
-    df_map: dict[str, pd.DataFrame] = {}
+    df_group: dict[str, pd.DataFrame] = {}
     
     for columns, rule in rules.items():
         original_column_names: list[str] = []
@@ -44,9 +44,9 @@ def split_df(dataframe: pd.DataFrame, rules: dict[list[int], SplitRules]) -> dic
         # Setting new column names in the same order
         new_df.columns = new_column_names
         # Saving dataframe on map
-        df_map[rule.df_name] = new_df
+        df_group[rule.df_name] = new_df
     
-    return df_map
+    return df_group
 
 class JoinRules():
     column_names: list[str] = []
@@ -63,12 +63,14 @@ class JoinRules():
     This may be used to join as many columns from as many dataframes as wanted
     It does not matter if dataframes are duplicated, or columns are passed more than once.
 """
-def join_dfs(df_map: dict[str, pd.DataFrame], rules: dict[str, JoinRules]) -> pd.DataFrame:
+def join_dfs(df_group: dict[str, pd.DataFrame], rules: dict[str, JoinRules]) -> pd.DataFrame:
     new_df: pd.DataFrame
     for df_name, rule in rules.items():
         if new_df is None:
-            new_df = df_map[df_name][rule.column_names]
+            new_df = df_group[df_name][rule.column_names]
         else:
-            new_df = pd.concat([new_df, df_map[df_name][rule.column_names]], axis = 1)
+            new_df = pd.concat([new_df, df_group[df_name][rule.column_names]], axis = 1)
             
     return new_df
+
+# TODO: create a function to iterate through dataframes and execute the dataframe operation on each of them
