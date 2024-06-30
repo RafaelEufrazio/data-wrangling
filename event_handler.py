@@ -18,9 +18,15 @@ class Action(BaseModel):
     type: Type[ActionType]
     args: dict[str, any]
     
+class ReferenceComparisonType(Enum):
+    NO_COMPARISON = 1
+    ONLY = 2
+    BOTH = 3
+
 class ReferenceDataframe(BaseModel):
-    df_name: Optional[str]
-    column_name: Optional[str]
+    df_name: str
+    column_name: str
+    comparison: Type[ReferenceComparisonType]
 
 class HandleEventRules(BaseModel):
     df_name: str
@@ -61,15 +67,18 @@ class EventHandler(BaseModel):
     action_type: Type[ActionType]
     __action_function__: Callable[..., pd.DataFrame]
     
+    rules: HandleEventRules
+    __comparison_function__: Callable[[bool, bool], bool]
+    
     __context__: Context
     __ref_context__: Context
-    both: bool
     
     def __init__(self, both: bool = False, **kwargs):
         super.__init__(**kwargs)
         self.both = both
         self.set_event_function()
         self.set_action_function()
+        self.set_comparison_function()
         
     def set_event_function(self):
         match self.event_type:
@@ -82,26 +91,38 @@ class EventHandler(BaseModel):
         match self.action_type:
             case ActionType.SUBSTITUTE:
                 self.__action_function__ = substitute
+                
+    def set_comparison_function(self):
+        if self.rules.reference == None: return
+        match self.rules.reference.comparison:
+            case ReferenceComparisonType.ONLY:
+                self.__comparison_function__ = lambda a, b: a and not b
+            case ReferenceComparisonType.BOTH:
+                self.__comparison_function__ = lambda a, b: a and b
+            # The no comparison case houldn't be called but is left here just in case
+            case ReferenceComparisonType.NO_COMPARISON:
+                self.__comparison_function__ = lambda a, _: a    
     
-    def create_context(self, df_group: dict[str, pd.DataFrame], rules: HandleEventRules):
-        self.__context__ = Context(df=df_group[rules.df_name], column_name=rules.column_name).initialize()
-        if rules.reference != None: self.__ref_context__ = Context(df=df_group[rules.reference.df_name], column_name=rules.reference.column_name)
+    def create_context(self, df_group: dict[str, pd.DataFrame]):
+        self.__context__ = Context(df=df_group[self.rules.df_name], column_name=self.rules.column_name).initialize()
+        if self.rules.reference != None: self.__ref_context__ = Context(df=df_group[self.rules.reference.df_name], column_name=rules.reference.column_name)
         
     def set_index(self, index):
         self.__context__.index = index
         if self.__ref_context__ != None: self.__ref_context__.index = index
         
     def check_event(self, **kwargs) -> bool:
-        if self.__event_function__(self.__context__, **kwargs) and (self.both and self.__event_function__(self.__ref_context__, **kwargs)): return True
-        else: return False
+        check = self.__event_function__(self.__context__, **kwargs)
+        if self.rules.reference == None or self.rules.reference.comparison == ReferenceComparisonType.NO_COMPARISON: return check
+        return self.__comparison_function__(check, self.__event_function__(self.__ref_context__, **kwargs))
     
     def run_action(self, **kwargs):
         self.__context__.df = self.__action_function__(**kwargs)
         
 
 def handle_event(df_group: dict[str, pd.DataFrame], event: Event, action: Action, rules: HandleEventRules) -> dict[str, pd.DataFrame]:
-    event_handler = EventHandler(event_type=event.type, action_type=action.type)
-    event_handler.create_context(df_group==df_group, rules=rules)
+    event_handler = EventHandler(event_type=event.type, action_type=action.type, rules=rules)
+    event_handler.create_context(df_group==df_group)
     
     for index, row in event_handler.__context__.df.index():
         event_handler.set_index(index)
