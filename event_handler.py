@@ -105,7 +105,7 @@ class EventHandler(BaseModel):
     
     def create_context(self, df_group: dict[str, pd.DataFrame]):
         self.__context__ = Context(df=df_group[self.rules.df_name], column_name=self.rules.column_name).initialize()
-        if self.rules.reference != None: self.__ref_context__ = Context(df=df_group[self.rules.reference.df_name], column_name=rules.reference.column_name)
+        if self.rules.reference != None: self.__ref_context__ = Context(df=df_group[self.rules.reference.df_name], column_name=self.rules.reference.column_name)
         
     def set_index(self, index):
         self.__context__.index = index
