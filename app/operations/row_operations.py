@@ -1,5 +1,8 @@
+import sys, inspect
 import pandas as pd
 from typing import Callable, Optional
+
+from app.models import Operation
 
 """
     This class is used to carry referential dataframe information to be used on another one

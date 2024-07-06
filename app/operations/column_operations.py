@@ -2,7 +2,7 @@ import sys, inspect
 import pandas as pd
 from typing import Optional
 
-from app.operations import Operation
+from app.models import Operation
 
 
 class SortColumn(Operation):
@@ -167,7 +167,7 @@ class MeanValuesColumn(Operation):
 
 # --------------------------------------------------------------------------
 # Always leave this at the bottom so it gets all the classes
-COLUMN_OPERATIONS = {
+COLUMN_OPERATIONS: dict[str, Operation] = {
     cls.__code__: cls
     for _, cls in inspect.getmembers(sys.modules[__name__], predicate=inspect.isclass)
     if len(cls.__code__)
