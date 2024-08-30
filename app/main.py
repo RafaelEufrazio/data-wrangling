@@ -1,6 +1,7 @@
 import io
 import pandas as pd
-from fastapi import FastAPI, UploadFile, HTTPException,  File
+from typing import List, Dict, Any, Union
+from fastapi import FastAPI, UploadFile, HTTPException, File
 from pydantic import BaseModel
 from io import BytesIO
 
@@ -10,26 +11,34 @@ app = FastAPI()
 
 class OperationData(BaseModel):
     code: str
-    attributes: dict
+    attributes: Dict[str, Any]
 
-class DataWrangleBody(BaseModel):
-    operations: list[OperationData]
+class RequestBody(BaseModel):
+    files: Dict[str, UploadFile]
+    operations: List[OperationData]
 
 @app.post("/file")
-async def data_wrangle(data: DataWrangleBody):#, files: list[UploadFile] = File(...)):
-    validate_operations(data.operations)
-    #dfs = load_files(files)
-    #dfs = run_operations(data.operations, dfs)
-    return
+async def data_wrangle(files: Dict[str, UploadFile] = File(...), operations: List[Operation] = File(...)):
+
+    dataframes = {}
+    for name, file in files.items():
+        contents = await file.read()
+        dataframes[name] = pd.read_csv(io.BytesIO(contents))
+    
+    # Process the operations here if needed
+    
+    # Example return, normally you would process and return results
+    return {"message": "Files received and read into dataframes.", "dataframe_keys": list(dataframes.keys())}
 
 
-def run_operations(operations: list[OperationData], dfs: list[dict[str, pd.DataFrame]]) -> list[dict[str, pd.DataFrame]]:
+
+def run_operations(operations: List[OperationData], dfs: List[Dict[str, pd.DataFrame]]) -> List[Dict[str, pd.DataFrame]]:
     for operation in operations:
         op: Operation = OPERATIONS[operation.code](**operation.attributes)
         res = op(dfs)
 
 
-def load_files(files: list[UploadFile]) -> dict[str: pd.DataFrame]:
+def load_files(files: List[UploadFile]) -> Dict[str, pd.DataFrame]:
     data = {}
     for file in files:
         contents = file.file.read()
@@ -41,7 +50,8 @@ def load_files(files: list[UploadFile]) -> dict[str: pd.DataFrame]:
 
     return data
 
-def validate_operations(operations: list[OperationData]):
+
+def validate_operations(operations: List[OperationData]):
     for op in operations:
         if op.code not in OPERATIONS:
             raise HTTPException(status_code=501, detail=f"operation {op.code} is not a valid operation")
