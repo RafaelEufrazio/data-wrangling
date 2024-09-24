@@ -17,6 +17,12 @@ class RequestBody(BaseModel):
     files: Dict[str, UploadFile]
     operations: List[OperationData]
 
+# Health check endpoint
+@app.get('/')
+async def hello():
+    return "Hello!"
+
+
 @app.post("/file")
 async def data_wrangle(files: Dict[str, UploadFile] = File(...), operations: List[Operation] = File(...)):
 
