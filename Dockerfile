@@ -4,13 +4,13 @@ FROM python:3.11-alpine
 WORKDIR /code
 
 # Copy the requirements file
-COPY ./requirements.txt /code/requirements.txt
+COPY ./requirements.txt requirements.txt
 
 # Install dependencies
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 # Copy the FastAPI application code
-COPY ./app/ /code/app/
+COPY ./app/ app/
 
 # Command to run the FastAPI app
 CMD uvicorn app.main:app --port 8000 --host 0.0.0.0 --reload
