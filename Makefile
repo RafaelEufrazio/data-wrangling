@@ -4,7 +4,7 @@ docker-build:
 	docker build -t data-wrangling .
 
 docker-run:
-	docker run --rm --name data-wrangling -p 8000:8000 data-wrangling
+	docker run --rm --name data-wrangling -p 8000:8000 -v ./app:/code/app data-wrangling
 
 run-local: local-install local-run
 
