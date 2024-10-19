@@ -13,9 +13,23 @@ class OperationData(BaseModel):
     code: str
     attributes: Dict[str, Any]
 
+
+class FileData(BaseModel):
+    alias: str
+    data: list[dict]
+
+    def to_dataframe(self) -> pd.DataFrame:
+        return pd.DataFrame(self.data)
+
+    def set_file_data(self, file: pd.DataFrame):
+        self.data = file.to_dict('records')
+        return
+
+
 class RequestBody(BaseModel):
-    files: Dict[str, UploadFile]
-    operations: List[OperationData]
+    file: FileData
+    operations: list[OperationData]
+
 
 # Health check endpoint
 @app.get('/')
@@ -24,38 +38,22 @@ async def hello():
 
 
 @app.post("/file")
-async def data_wrangle(files: Dict[str, UploadFile] = File(...), operations: List[Operation] = File(...)):
-
-    dataframes = {}
-    for name, file in files.items():
-        contents = await file.read()
-        dataframes[name] = pd.read_csv(io.BytesIO(contents))
-    
-    # Process the operations here if needed
-    
-    # Example return, normally you would process and return results
-    return {"message": "Files received and read into dataframes.", "dataframe_keys": list(dataframes.keys())}
+async def data_wrangle(body: RequestBody) -> FileData:
+    validate_operations(body.operations)
+    validate_file(body.file)
+    processed_file = run_operations(body.operations, body.file)
+    return processed_file
 
 
-
-def run_operations(operations: List[OperationData], dfs: List[Dict[str, pd.DataFrame]]) -> List[Dict[str, pd.DataFrame]]:
+def run_operations(operations: List[OperationData], file: FileData) -> FileData:
+    file_df = file.to_dataframe()
     for operation in operations:
         op: Operation = OPERATIONS[operation.code](**operation.attributes)
-        res = op(dfs)
+        file_df = op(file_df)
 
-
-def load_files(files: List[UploadFile]) -> Dict[str, pd.DataFrame]:
-    data = {}
-    for file in files:
-        contents = file.file.read()
-        buffer = BytesIO(contents)
-        df = pd.read_csv(buffer)
-        data[file.filename] = df
-        buffer.close()
-        file.file.close()
-
-    return data
-
+    file.set_file_data(file_df)
+    return file
+    
 
 def validate_operations(operations: List[OperationData]):
     for op in operations:
@@ -66,3 +64,10 @@ def validate_operations(operations: List[OperationData]):
             OPERATIONS[op.code](**op.attributes)
         except:
             raise HTTPException(status_code=422, detail=f"attributes {op.attributes} for operation {op.code} are not valid")
+
+
+def validate_file(file: FileData):
+    try:
+        file.to_dataframe()
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"unprocessable file")
