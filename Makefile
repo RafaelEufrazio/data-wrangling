@@ -1,4 +1,4 @@
-run-docker-reload: docker-build docker-run-reload
+run-docker-dev: docker-build docker-run-reload
 	
 run-docker: docker-build docker-run
 
